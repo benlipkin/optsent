@@ -1,0 +1,12 @@
+numpy
+pandas
+torch
+transformers
+tqdm
+mypy
+lxml
+pandas-stubs
+tqdm-stubs
+pylint
+pylint-json2html
+pylint-exit
