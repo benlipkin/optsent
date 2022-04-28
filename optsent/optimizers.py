@@ -84,7 +84,7 @@ class GreedyATSP(Object):
         matrix[:, vertex] = self._null
         indices.append(vertex)
         values.append(np.nan)
-        for _ in tqdm.tqdm(range(self._seqlen - 1), total=self._seqlen - 1):
+        for _ in tqdm.trange(self._seqlen - 1):  # type:ignore
             target = self._argopt(matrix[vertex, :])
             while not self._satisfied(sents.sentences, vertex, target):
                 matrix[:, target] = self._null

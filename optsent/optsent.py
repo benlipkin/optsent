@@ -37,7 +37,9 @@ class OptSent(Object):
         # refactor: loop O(n), compare each sent with batch of n sents, fill in whole column at once
         self.log("Building transition graph.")
         dim = self._inputs.size
-        indices = tqdm.tqdm(itertools.product(range(dim), range(dim)), total=dim ** 2)
+        indices = tqdm.tqdm(
+            itertools.product(range(dim), range(dim)), total=dim ** 2
+        )  # type:ignore
         for i, j in indices:
             if i == j:
                 value = np.nan
