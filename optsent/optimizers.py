@@ -80,7 +80,7 @@ class GreedyATSP(Object):
         matrix = sents.graph.matrix.copy()
         matrix[np.isnan(matrix)] = self._null
         indices, values = [], []
-        vertex = self._argoptr(self._opt(matrix, axis=1))
+        vertex = self._argoptr(self._opt(matrix, axis=0))
         matrix[:, vertex] = self._null
         indices.append(vertex)
         values.append(np.nan)
