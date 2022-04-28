@@ -1,0 +1,10 @@
+.git
+.github
+.gitignore
+.mypy_cache
+.dockerignore
+Dockerfile
+optsent.egg-info
+inputs
+outputs
+html

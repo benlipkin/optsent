@@ -17,13 +17,10 @@ update :
 
 ## env       : setup environment and install dependencies.
 .PHONY : env
-env : conda $(PACKAGE).egg-info/
+env : $(PACKAGE).egg-info/
 $(PACKAGE).egg-info/ : setup.py requirements.txt
+	@conda create -yn $(PACKAGE) $(EXEC)
 	@$(ACTIVATE) ; $(INSTALL)
-conda :
-ifeq "$(shell $@ info --envs | grep $(PACKAGE) | wc -l)" "0"
-	@$@ create -yn $(PACKAGE) $(EXEC)
-endif
 
 ## test      : run testing pipeline.
 .PHONY : test
