@@ -12,10 +12,12 @@ jobs:
     runs-on:           ubuntu-latest
 
     steps:
-      - name:          build docker image
+      - name:          checkout repo
         uses:          actions/checkout@v3.0.0
         with:
           fetch-depth: 1
+
+      - name:          build docker image
         run:           docker build . --file Dockerfile --tag optsent:latest
 
       - name:          run testing pipeline
