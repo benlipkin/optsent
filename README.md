@@ -38,17 +38,17 @@ python -m pip install optsent
 usage: __main__.py [-h] [-o OUTDIR] [-m MODEL] [-j OBJECTIVE] [-s SOLVER] [-c CONSTRAINT] [-l SEQLEN] [-x] inputs
 
 positional arguments (required):
-inputs 										(path to CSV)
+inputs 						(path to CSV)
 
 additional arguments (optional):
 -h, --help  show this help message and exit
--o OUTDIR, --outdir OUTDIR 					(default: ./outputs/)
--m MODEL, --model MODEL						(default: gpt2 [can be any HuggingFace CausalLM])
--j OBJECTIVE, --objective OBJECTIVE			(default: logp(s1s2)-logp(s1)-logp(s2))
--s SOLVER, --solver SOLVER					(default: GreedyATSP)
+-o OUTDIR, --outdir OUTDIR 			(default: ./outputs/)
+-m MODEL, --model MODEL				(default: gpt2 [can be any HuggingFace CausalLM])
+-j OBJECTIVE, --objective OBJECTIVE		(default: logp(s1s2)-logp(s1)-logp(s2))
+-s SOLVER, --solver SOLVER			(default: GreedyATSP)
 -c CONSTRAINT, --constraint CONSTRAINT		(default: no word repeats on boundaries)
--l SEQLEN, --seqlen SEQLEN					(default: same length as input materials)
--x, --maximize								(default: false [minimize])
+-l SEQLEN, --seqlen SEQLEN			(default: same length as input materials)
+-x, --maximize					(default: false [minimize])
 
 examples:
 python -m optsent inputs/strings.csv
