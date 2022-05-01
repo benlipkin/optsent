@@ -21,6 +21,7 @@ class OptSent(Object):
         constraint: str = "repeats",
         seqlen: int = -1,
         maximize: bool = False,
+        export: bool = True,
     ) -> None:
         # pylint: disable=unused-argument
         super().__init__()
@@ -53,33 +54,36 @@ class OptSent(Object):
         self._optimizer.solve(self._inputs)
 
     def _save_input(self) -> None:
-        self.log("Caching input strings.")
-        fname = self._outdir / self._unique_id / "INPUT.csv"
-        if not fname.parent.exists():
-            fname.parent.mkdir(parents=True, exist_ok=True)
-        table = self._inputs.sentences
-        table.to_csv(fname, index_label="SentenceID")
+        if self._export:
+            self.log("Caching input strings.")
+            fname = self._outdir / self._unique_id / "INPUT.csv"
+            if not fname.parent.exists():
+                fname.parent.mkdir(parents=True, exist_ok=True)
+            table = self._inputs.sentences
+            table.to_csv(fname, index_label="SentenceID")
 
     def _save_graph(self) -> None:
-        self.log("Caching transition graph.")
-        fname = self._outdir / self._unique_id / "GRAPH.csv"
-        if not fname.parent.exists():
-            fname.parent.mkdir(parents=True, exist_ok=True)
-        table = pd.DataFrame(
-            data=self._inputs.graph.matrix,
-            index=self._inputs.sentences.index,
-            columns=self._inputs.sentences.index,
-        )
-        table.to_csv(fname, index_label="SentenceID")
+        if self._export:
+            self.log("Caching transition graph.")
+            fname = self._outdir / self._unique_id / "GRAPH.csv"
+            if not fname.parent.exists():
+                fname.parent.mkdir(parents=True, exist_ok=True)
+            table = pd.DataFrame(
+                data=self._inputs.graph.matrix,
+                index=self._inputs.sentences.index,
+                columns=self._inputs.sentences.index,
+            )
+            table.to_csv(fname, index_label="SentenceID")
 
     def _save_optim(self) -> None:
-        self.log("Exporting optimal sequence.")
-        fname = self._outdir / self._unique_id / "OPTIM.csv"
-        if not fname.parent.exists():
-            fname.parent.mkdir(parents=True, exist_ok=True)
-        table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
-        table["TransitionObjective"] = self._optimizer.values
-        table.to_csv(fname, index_label="SentenceID")
+        if self._export:
+            self.log("Exporting optimal sequence.")
+            fname = self._outdir / self._unique_id / "OPTIM.csv"
+            if not fname.parent.exists():
+                fname.parent.mkdir(parents=True, exist_ok=True)
+            table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
+            table["TransitionObjective"] = self._optimizer.values
+            table.to_csv(fname, index_label="SentenceID")
 
     def run(self) -> None:
         self._save_input()
@@ -87,3 +91,4 @@ class OptSent(Object):
         self._save_graph()
         self._solve_optim()
         self._save_optim()
+        return self._inputs.sentences[self._optimizer.indices].values

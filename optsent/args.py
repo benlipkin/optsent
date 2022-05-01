@@ -126,3 +126,9 @@ class ArgTool(Object):
         if not isinstance(maximize, bool):
             raise TypeError("maximize only accepts type `bool`.")
         return maximize
+
+    @staticmethod
+    def prep_export(export: bool) -> bool:
+        if not isinstance(export, bool):
+            raise TypeError("export only accepts type `bool`.")
+        return export

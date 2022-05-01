@@ -61,14 +61,15 @@ from optsent import OptSent
 from my_code import list_of_strings, custom_model, custom_objective
 
 optsent = OptSent(
-	list_of_strings,
-	model=custom_model,
-	objective=custom_objective,
-	seqlen=100,
-	maximize=True,
+    list_of_strings,
+    model=custom_model,
+    objective=custom_objective,
+    seqlen=100,
+    maximize=True,
+    export=False,
 )
 
-optsent.run()
+ordered_strings = optsent.run()
 ```
 
 **Sample Output**:
