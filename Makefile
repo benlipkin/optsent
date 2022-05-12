@@ -24,19 +24,25 @@ $(PACKAGE).egg-info/ : setup.py requirements.txt
 
 ## test      : run testing pipeline.
 .PHONY : test
-test : pylint mypy
-pylint : env html/pylint/index.html
+test : mypy pylint pytest
 mypy : env html/mypy/index.html
-html/pylint/index.html : html/pylint/index.json
-	@$(ACTIVATE) ; pylint-json2html -o $@ -e utf-8 $<
-html/pylint/index.json : $(PACKAGE)/*.py
-	@mkdir -p $(@D)
-	@$(ACTIVATE) ; pylint $(PACKAGE) \
-	--disable C0114,C0115,C0116,R0903,R0913,W0235,W1203 \
-	--generated-members torch.* \
-	--output-format=colorized,json:$@ \
-	|| pylint-exit $$?
+pylint : env html/pylint/index.html
+pytest : env html/coverage/index.html
 html/mypy/index.html : $(PACKAGE)/*.py
 	@$(ACTIVATE) ; mypy \
 	-p $(PACKAGE) \
 	--html-report $(@D)
+html/pylint/index.html : html/pylint/index.json
+	@$(ACTIVATE) ; pylint-json2html -o $@ -e utf-8 $<
+html/pylint/index.json : $(PACKAGE)/*.py test/*.py
+	@mkdir -p $(@D)
+	@$(ACTIVATE) ; pylint $(PACKAGE) test/*.py \
+	--disable C0114,C0115,C0116,R0903,R0912,R0913,W0235,W1203 \
+	--generated-members torch.* \
+	--output-format=colorized,json:$@ \
+	|| pylint-exit $$?
+html/coverage/index.html : html/pytest/report.html
+	@$(ACTIVATE) ; coverage html -d $(@D)
+html/pytest/report.html : $(PACKAGE)/*.py test/*.py
+	@$(ACTIVATE) ; coverage run --branch -m pytest \
+	--html=$@ --self-contained-html

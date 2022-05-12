@@ -13,7 +13,7 @@ from optsent.args import ArgTool
 class OptSent(Object):
     def __init__(
         self,
-        inputs: str | pathlib.Path | typing.Collection[str] = "",
+        inputs: str | pathlib.Path | typing.Collection[str],
         outdir: str | pathlib.Path = pathlib.Path(__file__).parents[1] / "outputs",
         model: str | ModelInterface = "gpt2",
         objective: str | ObjectiveInterface = "normlogp",
@@ -33,6 +33,10 @@ class OptSent(Object):
             argprep = getattr(argtool, f"prep_{arg}")
             setattr(self, f"_{arg}", argprep(value))
         self._optimizer = argtool.get_optimizer(kwargs)
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     def _build_graph(self) -> None:
         # refactor: loop O(n), compare each sent with batch of n sents, fill in whole column at once
@@ -56,18 +60,14 @@ class OptSent(Object):
     def _save_input(self) -> None:
         if self._export:
             self.log("Caching input strings.")
-            fname = self._outdir / self._unique_id / "INPUT.csv"
-            if not fname.parent.exists():
-                fname.parent.mkdir(parents=True, exist_ok=True)
+            fname = self._outdir / self.unique_id / "INPUT.csv"
             table = self._inputs.sentences
             table.to_csv(fname, index_label="SentenceID")
 
     def _save_graph(self) -> None:
         if self._export:
             self.log("Caching transition graph.")
-            fname = self._outdir / self._unique_id / "GRAPH.csv"
-            if not fname.parent.exists():
-                fname.parent.mkdir(parents=True, exist_ok=True)
+            fname = self._outdir / self.unique_id / "GRAPH.csv"
             table = pd.DataFrame(
                 data=self._inputs.graph.matrix,
                 index=self._inputs.sentences.index,
@@ -78,14 +78,14 @@ class OptSent(Object):
     def _save_optim(self) -> None:
         if self._export:
             self.log("Exporting optimal sequence.")
-            fname = self._outdir / self._unique_id / "OPTIM.csv"
-            if not fname.parent.exists():
-                fname.parent.mkdir(parents=True, exist_ok=True)
+            fname = self._outdir / self.unique_id / "OPTIM.csv"
             table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
             table["TransitionObjective"] = self._optimizer.values
             table.to_csv(fname, index_label="SentenceID")
 
     def run(self) -> None:
+        if self._export:
+            (self._outdir / self.unique_id).mkdir(parents=True, exist_ok=True)
         self._save_input()
         self._build_graph()
         self._save_graph()

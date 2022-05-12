@@ -10,3 +10,6 @@ tqdm-stubs
 pylint
 pylint-json2html
 pylint-exit
+pytest
+pytest-html
+coverage

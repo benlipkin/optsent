@@ -11,6 +11,8 @@ from optsent.abstract import Object
 class Model(Object):
     def __init__(self, model_id: str) -> None:
         super().__init__()
+        if not isinstance(model_id, str):
+            raise TypeError("model_id must be type `str`.")
         self._id = model_id
         try:
             self._config = AutoConfig.from_pretrained(self._id)
@@ -25,7 +27,7 @@ class Model(Object):
         self.log(f"Loaded pretrained {self._id} model on {self._device}.")
 
     def _set_torch_device(self) -> None:
-        if torch.cuda.is_available():
+        if torch.cuda.is_available():  # pragma: no cover
             self._device = torch.device("cuda")
             torch.set_default_tensor_type(torch.cuda.FloatTensor)  # type: ignore
             try:

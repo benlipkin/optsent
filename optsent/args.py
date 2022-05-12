@@ -2,6 +2,7 @@ import hashlib
 import pathlib
 import typing
 
+import numpy as np
 import pandas as pd
 
 from optsent.abstract import Object, ModelInterface, ObjectiveInterface
@@ -59,11 +60,26 @@ class ArgTool(Object):
             if not inputs.is_file():
                 raise FileNotFoundError(f"inputs file ({inputs}) does not exist.")
             inputs = pd.read_csv(inputs)
-            if "Sentence" not in inputs.columns:
-                raise ValueError(f"inputs file ({inputs}) must have `Sentence` column.")
-            inputs = inputs["Sentence"]
         if not isinstance(inputs, typing.Collection):
-            raise TypeError("Must supply valid inputs path or container.")
+            raise TypeError("must supply valid inputs path or container.")
+        if isinstance(inputs, pd.DataFrame):
+            if "Sentence" not in inputs.columns:
+                raise ValueError("inputs must have `Sentence` column if pd.DataFrame.")
+            inputs = inputs["Sentence"]
+        if isinstance(inputs, np.ndarray):
+            if inputs.ndim > 1:
+                inputs = inputs.squeeze()
+                if inputs.ndim > 1:
+                    raise ValueError("np.ndarray inputs must be 1D or singleton.")
+        if not isinstance(inputs, pd.Series):
+            try:
+                inputs = pd.Series(inputs, dtype=str)
+            except Exception as invalid_container:
+                raise TypeError("invalid inputs container type.") from invalid_container
+        if not inputs.size > 1:
+            raise ValueError("inputs container must have at least 2 elements.")
+        if not all(isinstance(i, str) for i in inputs):
+            raise TypeError("inputs container must only contain strings.")
         return SentenceCollection(inputs)
 
     @staticmethod
@@ -78,6 +94,8 @@ class ArgTool(Object):
     def prep_model(model: str | ModelInterface) -> Model | ModelInterface:
         if isinstance(model, str):
             return Model(model)
+        if isinstance(model, type):
+            raise TypeError("model must be an instance of a class, not a type.")
         if not isinstance(model, ModelInterface):
             raise TypeError("model must implement `score` and `embed`.")
         return model
@@ -91,6 +109,8 @@ class ArgTool(Object):
             if objective not in supported:
                 raise ValueError("objective must be one of {supported}.")
             return Objective(objective)
+        if isinstance(objective, type):
+            raise TypeError("objective must be an instance of a class, not a type.")
         if not isinstance(objective, ObjectiveInterface):
             raise TypeError("objective must implement `evaluate`.")
         return objective
@@ -117,8 +137,8 @@ class ArgTool(Object):
     def prep_seqlen(seqlen: int) -> int:
         if not isinstance(seqlen, int):
             raise TypeError("seqlen only accepts type `int`.")
-        if seqlen < -1 or seqlen == 0:
-            raise ValueError("seqlen must be positive or -1 for all.")
+        if not (seqlen == -1 or seqlen > 1):
+            raise ValueError("seqlen must be >1 or -1 for all.")
         return seqlen
 
     @staticmethod
