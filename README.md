@@ -69,7 +69,7 @@ optsent = OptSent(
     export=False,
 )
 
-ordered_strings = optsent.run()
+ordered_strings_w_weights = optsent.run()
 ```
 
 **Sample Output**:

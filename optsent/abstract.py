@@ -35,16 +35,19 @@ class Object(abc.ABC):
 
 @typing.runtime_checkable
 class IModel(typing.Protocol):
-    def score(self, sent: str) -> float:
+    @staticmethod
+    def score(sent: str) -> float:
         raise NotImplementedError()  # pragma: no cover
 
-    def embed(self, sent: str) -> npt.NDArray[np.float32]:
+    @staticmethod
+    def embed(sent: str) -> npt.NDArray[np.float32]:
         raise NotImplementedError()  # pragma: no cover
 
 
 @typing.runtime_checkable
 class IObjective(typing.Protocol):
-    def evaluate(self, sent1: str, sent2: str, model: IModel) -> float:
+    @staticmethod
+    def evaluate(sent1: str, sent2: str, model: IModel) -> float:
         raise NotImplementedError()  # pragma: no cover
 
 

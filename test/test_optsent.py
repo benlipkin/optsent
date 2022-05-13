@@ -1,13 +1,12 @@
 import pathlib
 
+import numpy as np
+import numpy.testing as npt
+
 from test_abstract import check_raises
 
 from optsent.abstract import IModel, IObjective, IOptimizer
 from optsent.optsent import OptSent
-
-
-class MockCustomOptimizer:
-    pass  # need to test this
 
 
 def test_optsent_constructor():
@@ -41,10 +40,59 @@ def test_optsent_constructor():
 
 
 def test_optsent_runner():
-    def check_output(seq):
-        assert len(seq) == 3
+    def check_output(table):
+        assert table.shape[0] == 3
+        assert table.shape[1] == 2
 
     cls = OptSent
     fname = pathlib.Path(__file__).parent / "test_inputs" / "test_strings.txt"
     for arg in ({"inputs": fname, "export": True}, {"inputs": fname, "export": False}):
         check_output(cls(**arg).run())
+
+
+def test_optsent_custom():
+    class MockCustomModel(IModel):
+        @staticmethod
+        def score(sent):
+            return float(len(sent))
+
+        @staticmethod
+        def embed(sent):
+            return np.array([0.0, float(len(sent)), 0.0])
+
+    class MockCustomObjective(IObjective):
+        @staticmethod
+        def evaluate(sent1, sent2, model):
+            return model.score(sent2) - model.score(sent1)
+
+    class MockCustomOptimizer(IOptimizer):
+        def __init__(self):
+            self._indices = []
+            self._values = []
+
+        @property
+        def indices(self):
+            return self._indices
+
+        @property
+        def values(self):
+            return self._values
+
+        def solve(self, coll):
+            weights = np.nanmin(coll.graph.matrix, axis=1)
+            self._indices = np.argsort(weights)
+            self._values = weights[self._indices]
+
+    def check_output(table):
+        npt.assert_array_equal(table.index, [2, 1, 0])
+        npt.assert_array_equal(table.Sentence.values, ["abc", "ab", "a"])
+        npt.assert_array_equal(table.TransitionObjective.values, [-2, -1, 1])
+
+    inputs = ["a", "ab", "abc"]
+    optsent = OptSent(
+        inputs,
+        model=MockCustomModel(),
+        objective=MockCustomObjective(),
+        optimizer=MockCustomOptimizer(),
+    )
+    check_output(optsent.run())

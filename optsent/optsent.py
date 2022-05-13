@@ -57,6 +57,11 @@ class OptSent(Object):
         self.info("Solving sequence optimization.")
         self._optimizer.solve(self._inputs)
 
+    def _make_output_table(self) -> pd.DataFrame:
+        table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
+        table["TransitionObjective"] = self._optimizer.values
+        return table
+
     def _save_input(self) -> None:
         if self._export:
             self.info("Caching input strings.")
@@ -79,11 +84,10 @@ class OptSent(Object):
         if self._export:
             self.info("Exporting optimal sequence.")
             fname = self._outdir / self.unique_id / "OPTIM.csv"
-            table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
-            table["TransitionObjective"] = self._optimizer.values
+            table = self._make_output_table()
             table.to_csv(fname, index_label="SentenceID")
 
-    def run(self) -> None:
+    def run(self) -> pd.DataFrame:
         if self._export:
             (self._outdir / self.unique_id).mkdir(parents=True, exist_ok=True)
         self._save_input()
@@ -91,4 +95,4 @@ class OptSent(Object):
         self._save_graph()
         self._solve_optim()
         self._save_optim()
-        return self._inputs.sentences[self._optimizer.indices].values
+        return self._make_output_table()
