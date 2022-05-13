@@ -56,10 +56,6 @@ def test_optsent_custom():
         def score(sent):
             return float(len(sent))
 
-        @staticmethod
-        def embed(sent):
-            return np.array([0.0, float(len(sent)), 0.0])
-
     class MockCustomObjective(IObjective):
         @staticmethod
         def evaluate(sent1, sent2, model):
