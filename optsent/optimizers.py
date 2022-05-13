@@ -10,28 +10,28 @@ from optsent.data import SentenceCollection
 
 
 class Optimizer(Object):
-    def __init__(self, solver: str, constraint: str, seqlen: int, maximize: bool):
+    def __init__(self, optimizer: str, constraint: str, seqlen: int, maximize: bool):
         super().__init__()
         if not all(
             isinstance(arg, type)
             for arg, type in zip(
-                (solver, constraint, seqlen, maximize), (str, str, int, bool)
+                (optimizer, constraint, seqlen, maximize), (str, str, int, bool)
             )
         ):
             raise TypeError("arguments must adhere to interface.")
-        self._id = solver
+        self._id = optimizer
         self._indices: typing.List[np.int64] = []
         self._values: typing.List[float] = []
         satisfied: typing.Callable = self._build_constraint(constraint)
         try:
-            self._solver = self.supported_solvers()[self._id](
+            self._optimizer = self.supported_optimizers()[self._id](
                 maximize, seqlen, satisfied
             )
-        except KeyError as invalid_solver:
+        except KeyError as invalid_optimizer:
             raise ValueError(
-                f"solver_id must be in supported: {self.supported_solvers().keys()}"
-            ) from invalid_solver
-        self.info(f"Defined {self._solver._name[1:]} solver.")
+                f"optimizer_id must be in supported: {self.supported_optimizers().keys()}"
+            ) from invalid_optimizer
+        self.info(f"Defined {self._optimizer._name[1:]} optimizer.")
 
     @property
     def indices(self) -> typing.List[np.int64]:
@@ -42,7 +42,7 @@ class Optimizer(Object):
         return self._values
 
     @classmethod
-    def supported_solvers(cls) -> typing.Dict[str, typing.Callable]:
+    def supported_optimizers(cls) -> typing.Dict[str, typing.Callable]:
         return {"greedy": _GreedyATSP}
 
     @classmethod
@@ -65,7 +65,7 @@ class Optimizer(Object):
     def solve(self, sents: SentenceCollection) -> None:
         if not isinstance(sents, SentenceCollection):
             raise TypeError("Optimizer can only solve `SentenceCollection` objects.")
-        self._indices, self._values = self._solver(sents)
+        self._indices, self._values = self._optimizer(sents)
 
 
 class _GreedyATSP(Object):

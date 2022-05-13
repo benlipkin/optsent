@@ -9,6 +9,10 @@ from optsent.args import ArgTool
 from optsent.optimizers import Optimizer
 
 
+class MockCustomObjective:
+    pass  # need to test this
+
+
 def get_default_coll():
     fname = pathlib.Path(__file__).parent / "test_inputs" / "test_strings.txt"
     coll = ArgTool().prep_inputs(fname)

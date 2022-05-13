@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from optsent.abstract import Object, ModelInterface, ObjectiveInterface
+from optsent.abstract import Object, IModel, IObjective, IOptimizer
 from optsent.args import ArgTool
 
 
@@ -15,9 +15,9 @@ class OptSent(Object):
         self,
         inputs: str | pathlib.Path | typing.Collection[str],
         outdir: str | pathlib.Path = pathlib.Path(__file__).parents[1] / "outputs",
-        model: str | ModelInterface = "gpt2",
-        objective: str | ObjectiveInterface = "normlogp",
-        solver: str = "greedy",
+        model: str | IModel = "gpt2",
+        objective: str | IObjective = "normlogp",
+        optimizer: str | IOptimizer = "greedy",
         constraint: str = "repeats",
         seqlen: int = -1,
         maximize: bool = False,
@@ -32,7 +32,7 @@ class OptSent(Object):
         for arg, value in kwargs.items():
             argprep = getattr(argtool, f"prep_{arg}")
             setattr(self, f"_{arg}", argprep(value))
-        self._optimizer = argtool.get_optimizer(kwargs)
+        self._optimizer = argtool.build_optimizer(kwargs)
 
     @property
     def unique_id(self):

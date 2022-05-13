@@ -2,7 +2,7 @@ import typing
 
 import numpy as np
 
-from optsent.abstract import Object, ModelInterface
+from optsent.abstract import Object, IModel
 
 
 class Objective(Object):
@@ -26,10 +26,10 @@ class Objective(Object):
             "embsim": _EmbeddingSimilarity,
         }
 
-    def evaluate(self, sent1: str, sent2: str, model: ModelInterface) -> float:
+    def evaluate(self, sent1: str, sent2: str, model: IModel) -> float:
         if not all(
             isinstance(arg, type)
-            for arg, type in zip((sent1, sent2, model), (str, str, ModelInterface))
+            for arg, type in zip((sent1, sent2, model), (str, str, IModel))
         ):
             raise TypeError("arguments must adhere to interface to get evaluated.")
         return self._objective(sent1, sent2, model)
@@ -37,13 +37,13 @@ class Objective(Object):
 
 class _NormJointLogProb(Object):
     @staticmethod
-    def __call__(sent1: str, sent2: str, model: ModelInterface) -> float:
+    def __call__(sent1: str, sent2: str, model: IModel) -> float:
         return model.score(sent1 + sent2) - (model.score(sent1) + model.score(sent2))
 
 
 class _EmbeddingSimilarity(Object):
     @staticmethod
-    def __call__(sent1: str, sent2: str, model: ModelInterface) -> float:
+    def __call__(sent1: str, sent2: str, model: IModel) -> float:
         emb1, emb2 = model.embed(sent1), model.embed(sent2)
         cos_sim = (emb1 @ emb2.T).item() / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
         if np.abs(cos_sim) == 1.0:

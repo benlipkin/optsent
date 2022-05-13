@@ -2,37 +2,41 @@ import pathlib
 
 from test_abstract import check_raises
 
+from optsent.abstract import IModel, IObjective, IOptimizer
 from optsent.optsent import OptSent
 
 
+class MockCustomOptimizer:
+    pass  # need to test this
+
+
 def test_optsent_constructor():
-    class MockModel:
-        def score(self, sent):
-            raise NotImplementedError()  # pragma: no cover
+    class ValidModel(IModel):
+        pass
 
-        def embed(self, sent):
-            raise NotImplementedError()  # pragma: no cover
+    class ValidObjective(IObjective):
+        pass
 
-    class MockObjective:
-        def evaluate(self, sent1, sent2, model):
-            raise NotImplementedError()  # pragma: no cover
+    class ValidOptimizer(IOptimizer):
+        pass
 
     def check_output(cls, args):
-        default = "min_test_strings_objective=normlogp_solver=greedy_constraint=repeats_model=gpt2"
+        base = "min_test_strings_objective=normlogp_optimizer=greedy_constraint=repeats_model=gpt2"
         if not all(isinstance(arg, str) for arg in args):
             assert "CUSTOM" in cls.unique_id
         else:
-            assert cls.unique_id == default
+            assert cls.unique_id == base
 
     cls = OptSent
     fname = str(pathlib.Path(__file__).parent / "test_inputs" / "test_strings.txt")
     for arg in (
-        (fname, "gpt2", "normlogp"),
-        (["abc", "123"], "gpt2", "normlogp"),
-        (fname, MockModel(), "normlogp"),
-        (fname, "gpt2", MockObjective()),
+        (fname, "gpt2", "normlogp", "greedy"),
+        (["abc", "123"], "gpt2", "normlogp", "greedy"),
+        (fname, ValidModel(), "normlogp", "greedy"),
+        (fname, "gpt2", ValidObjective(), "greedy"),
+        (fname, "gpt2", "normlogp", ValidOptimizer()),
     ):
-        check_output(cls(arg[0], model=arg[1], objective=arg[2]), arg)
+        check_output(cls(arg[0], model=arg[1], objective=arg[2], optimizer=arg[3]), arg)
     check_raises(cls, (), TypeError)
 
 

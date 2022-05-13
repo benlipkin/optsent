@@ -4,13 +4,13 @@ import numpy as np
 
 from test_abstract import check_raises, check_interface
 
-from optsent.abstract import ModelInterface
+from optsent.abstract import IModel
 from optsent.models import Model
 
 
 def test_model_constructor():
     cls = Model
-    check_interface(cls("gpt2"), ModelInterface)
+    check_interface(cls("gpt2"), IModel)
     check_raises(cls, 123, TypeError)
     check_raises(cls, "distilbert", ValueError)
 

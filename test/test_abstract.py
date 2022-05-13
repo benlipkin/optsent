@@ -1,6 +1,6 @@
 import pytest
 
-from optsent.abstract import Object, ModelInterface, ObjectiveInterface
+from optsent.abstract import Object, IModel, IObjective, IOptimizer
 
 
 def check_raises(call, arg, exception):
@@ -16,8 +16,9 @@ def check_interface(cls, interface):
 
 
 def test_interfaces():
-    check_raises(ModelInterface, (), TypeError)
-    check_raises(ObjectiveInterface, (), TypeError)
+    check_raises(IModel, (), TypeError)
+    check_raises(IObjective, (), TypeError)
+    check_raises(IOptimizer, (), TypeError)
 
 
 def test_logging():

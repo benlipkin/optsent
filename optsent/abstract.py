@@ -34,7 +34,7 @@ class Object(abc.ABC):
 
 
 @typing.runtime_checkable
-class ModelInterface(typing.Protocol):
+class IModel(typing.Protocol):
     def score(self, sent: str) -> float:
         raise NotImplementedError()  # pragma: no cover
 
@@ -43,6 +43,20 @@ class ModelInterface(typing.Protocol):
 
 
 @typing.runtime_checkable
-class ObjectiveInterface(typing.Protocol):
-    def evaluate(self, sent1: str, sent2: str, model: ModelInterface) -> float:
+class IObjective(typing.Protocol):
+    def evaluate(self, sent1: str, sent2: str, model: IModel) -> float:
+        raise NotImplementedError()  # pragma: no cover
+
+
+@typing.runtime_checkable
+class IOptimizer(typing.Protocol):
+    @property
+    def indices(self) -> typing.List[np.int64]:
+        pass
+
+    @property
+    def values(self) -> typing.List[float]:
+        pass
+
+    def solve(self, coll) -> None:
         raise NotImplementedError()  # pragma: no cover

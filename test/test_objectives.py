@@ -2,7 +2,7 @@ import numpy as np
 
 from test_abstract import check_raises, check_interface
 
-from optsent.abstract import ObjectiveInterface
+from optsent.abstract import IObjective
 from optsent.models import Model
 from optsent.objectives import Objective
 
@@ -20,7 +20,7 @@ class MockCustomModel:
 def test_objective_constructor():
     cls = Objective
     for arg in cls.supported_functions():
-        check_interface(cls(arg), ObjectiveInterface)
+        check_interface(cls(arg), IObjective)
     check_raises(cls, 123, TypeError)
     check_raises(cls, "fake", ValueError)
 

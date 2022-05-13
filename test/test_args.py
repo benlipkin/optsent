@@ -5,7 +5,7 @@ import pandas as pd
 
 from test_abstract import check_raises, check_interface
 
-from optsent.abstract import ModelInterface, ObjectiveInterface
+from optsent.abstract import IModel, IObjective, IOptimizer
 from optsent.args import ArgTool
 from optsent.optimizers import Optimizer
 
@@ -42,19 +42,15 @@ def test_outdir_prep():
 
 
 def test_model_prep():
-    class ValidModel:
-        def score(self, sent):
-            raise NotImplementedError()  # pragma: no cover
-
-        def embed(self, sent):
-            raise NotImplementedError()  # pragma: no cover
+    class ValidModel(IModel):
+        pass
 
     class InvalidModel:
         pass
 
     func = ArgTool().prep_model
     for arg in ("gpt2", ValidModel()):
-        check_interface(func(arg), ModelInterface)
+        check_interface(func(arg), IModel)
     for arg in (123, ValidModel, InvalidModel()):
         check_raises(func, arg, TypeError)
     for arg in ("fake", "distilbert"):
@@ -62,28 +58,52 @@ def test_model_prep():
 
 
 def test_objective_prep():
-    class ValidObjective:
-        def evaluate(self, sent1, sent2, model):
-            raise NotImplementedError()  # pragma: no cover
+    class ValidObjective(IObjective):
+        pass
 
     class InvalidObjective:
         pass
 
     func = ArgTool().prep_objective
     for arg in ("normlogp", "embsim", ValidObjective()):
-        check_interface(func(arg), ObjectiveInterface)
+        check_interface(func(arg), IObjective)
     for arg in (123, ValidObjective, InvalidObjective()):
         check_raises(func, arg, TypeError)
     check_raises(func, "fake", ValueError)
 
 
-def test_solver_prep():
-    def check_output(solver):
-        assert solver in Optimizer.supported_solvers()
+def test_optimizer_build():
+    class ValidOptimizer(IOptimizer):
+        pass
 
-    func = ArgTool().prep_solver
+    class InvalidOptimizer:
+        pass
+
+    func = ArgTool().build_optimizer
+    for arg in (
+        {
+            "optimizer": "greedy",
+            "constraint": "repeats",
+            "seqlen": -1,
+            "maximize": False,
+        },
+        {"optimizer": ValidOptimizer()},
+    ):
+        check_interface(func(arg), IOptimizer)
+    for arg in (
+        {"optimizer": 123},
+        {"optimizer": ValidOptimizer},
+        {"optimizer": InvalidOptimizer()},
+    ):
+        check_raises(func, arg, TypeError)
+
+
+def test_optimizer_prep():
+    def check_output(optimizer):
+        assert optimizer in Optimizer.supported_optimizers()
+
+    func = ArgTool().prep_optimizer
     check_output(func("greedy"))
-    check_raises(func, 123, TypeError)
     check_raises(func, "fake", ValueError)
 
 

@@ -4,9 +4,9 @@
 
 ### What is it?
 
-A python module to generate optimal sequences of strings over built-in or user-defined transition objectives.
+OptSent is a python library for efficiently solving shortest-path problems over sets of strings given any arbitrary transition objective.
 
-**Example use case**: Generate psycholinguistic stimulus materials that minimize compositionality over trial boundaries to avoid spillover effects.
+This package has primarily been used to generate psycholinguistic stimulus materials, where it is often desirable to minimize compositionality between adjacent trials, operationalized as a function of the joint causal language modeling probability.
 
 ### How can I get it?
 
@@ -54,18 +54,18 @@ examples:
 python -m optsent inputs/strings.csv
 ```
 
-**API:** <sup>same options as CLI, but can also substitute user-defined objects (as long as they adhere to interface)</sup>
+**API:**
+<sub>accepts same arguments as CLI, as well as the option to substitute user-defined objects for critical components (note: user-defined objects must adhere to the interfaces specified in `optsent.abstract`.)</sub>
 
 ```python
 from optsent import OptSent
-from my_code import list_of_strings, custom_model, custom_objective
+from my_code import list_of_strings, custom_model, custom_objective, custom_optimizer
 
 optsent = OptSent(
     list_of_strings,
     model=custom_model,
     objective=custom_objective,
-    seqlen=100,
-    maximize=True,
+    optimizer=custom_optimizer,
     export=False,
 )
 
@@ -79,23 +79,24 @@ INFO:ArgTool:             inputs      inputs/SampleSmall.csv
 INFO:ArgTool:             outdir      ~/optsent/outputs
 INFO:ArgTool:             model       gpt2
 INFO:ArgTool:             objective   normlogp
-INFO:ArgTool:             solver      greedy
+INFO:ArgTool:             optimizer   greedy
 INFO:ArgTool:             constraint  repeats
 INFO:ArgTool:             seqlen      -1
 INFO:ArgTool:             maximize    False
-INFO:ArgTool:             unique_id   min_SampleSmall_objective=normlogp_solver=greedy_constraint=repeats_model=gpt2
+INFO:ArgTool:             export      True
+INFO:ArgTool:             unique_id   min_SampleSmall_objective=normlogp_optimizer=greedy_constraint=repeats_model=gpt2
 INFO:SentenceCollection:  Built collection of 10 sentences.
 INFO:Model:               Loaded pretrained gpt2 model on cpu.
 INFO:Objective:           Defined NormJointLogProb objective.
-INFO:Optimizer:           Defined GreedyATSP solver.
+INFO:Optimizer:           Defined GreedyATSP optimizer.
 INFO:OptSent:             Caching input strings.
 INFO:OptSent:             Building transition graph.
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:05<00:00, 18.84it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:04<00:00, 20.99it/s]
 INFO:OptSent:             Caching transition graph.
 INFO:OptSent:             Solving sequence optimization.
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 20132.66it/s]
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 20404.72it/s]
 INFO:OptSent:             Exporting optimal sequence.
-INFO:CLI:                 Completed successfully in 0:00:08.883382.
+INFO:CLI:                 Completed successfully in 0:00:08.423529.
 ```
 
 ### Where can I learn more?
