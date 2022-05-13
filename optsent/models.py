@@ -24,7 +24,7 @@ class Model(Object):
                 "model must be valid HuggingFace CausalLM."
             ) from invalid_id
         self._set_torch_device()
-        self.log(f"Loaded pretrained {self._id} model on {self._device}.")
+        self.info(f"Loaded pretrained {self._id} model on {self._device}.")
 
     def _set_torch_device(self) -> None:
         if torch.cuda.is_available():  # pragma: no cover

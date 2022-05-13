@@ -31,7 +31,7 @@ class Optimizer(Object):
             raise ValueError(
                 f"solver_id must be in supported: {self.supported_solvers().keys()}"
             ) from invalid_solver
-        self.log(f"Defined {self._solver._name} solver.")
+        self.info(f"Defined {self._solver._name[1:]} solver.")
 
     @property
     def indices(self) -> typing.List[np.int64]:

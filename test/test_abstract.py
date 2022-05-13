@@ -1,6 +1,6 @@
 import pytest
 
-from optsent.abstract import ModelInterface, ObjectiveInterface
+from optsent.abstract import Object, ModelInterface, ObjectiveInterface
 
 
 def check_raises(call, arg, exception):
@@ -18,3 +18,12 @@ def check_interface(cls, interface):
 def test_interfaces():
     check_raises(ModelInterface, (), TypeError)
     check_raises(ObjectiveInterface, (), TypeError)
+
+
+def test_logging():
+    class MockObject(Object):
+        pass
+
+    for arg in ("info", "warn"):
+        func = getattr(MockObject(), arg)
+        check_raises(func, 123, TypeError)

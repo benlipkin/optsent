@@ -17,7 +17,7 @@ class Objective(Object):
             raise ValueError(
                 f"objective_id must be in supported: {self.supported_functions().keys()}"
             ) from invalid_objective
-        self.log(f"Defined {self._objective._name} objective.")
+        self.info(f"Defined {self._objective._name[1:]} objective.")
 
     @classmethod
     def supported_functions(cls) -> typing.Dict[str, typing.Callable]:

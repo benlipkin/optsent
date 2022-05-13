@@ -40,7 +40,7 @@ class OptSent(Object):
 
     def _build_graph(self) -> None:
         # refactor: loop O(n), compare each sent with batch of n sents, fill in whole column at once
-        self.log("Building transition graph.")
+        self.info("Building transition graph.")
         dim = self._inputs.size
         indices = tqdm.tqdm(
             itertools.product(range(dim), range(dim)), total=dim ** 2
@@ -54,19 +54,19 @@ class OptSent(Object):
             self._inputs.graph.write_transition_weight(i, j, value)
 
     def _solve_optim(self) -> None:
-        self.log("Solving sequence optimization.")
+        self.info("Solving sequence optimization.")
         self._optimizer.solve(self._inputs)
 
     def _save_input(self) -> None:
         if self._export:
-            self.log("Caching input strings.")
+            self.info("Caching input strings.")
             fname = self._outdir / self.unique_id / "INPUT.csv"
             table = self._inputs.sentences
             table.to_csv(fname, index_label="SentenceID")
 
     def _save_graph(self) -> None:
         if self._export:
-            self.log("Caching transition graph.")
+            self.info("Caching transition graph.")
             fname = self._outdir / self.unique_id / "GRAPH.csv"
             table = pd.DataFrame(
                 data=self._inputs.graph.matrix,
@@ -77,7 +77,7 @@ class OptSent(Object):
 
     def _save_optim(self) -> None:
         if self._export:
-            self.log("Exporting optimal sequence.")
+            self.info("Exporting optimal sequence.")
             fname = self._outdir / self.unique_id / "OPTIM.csv"
             table = pd.DataFrame(self._inputs.sentences[self._optimizer.indices])
             table["TransitionObjective"] = self._optimizer.values

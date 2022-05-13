@@ -22,7 +22,7 @@ class CLI(Object):
         start = datetime.now()
         OptSent(**vars(self._parser.parse_args())).run()
         elapsed = datetime.now() - start
-        self.log(f"Completed successfully in {elapsed}.")
+        self.info(f"Completed successfully in {elapsed}.")
 
 
 if __name__ == "__main__":

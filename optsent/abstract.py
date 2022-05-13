@@ -13,13 +13,18 @@ class Object(abc.ABC):
         self._name = self.__class__.__name__
         self._logger = logging.getLogger(self._name)
 
-    def log(self, message: str) -> None:
-        indent = " " * (20 - len(self._name))
-        self._logger.info(f"{indent}{message}")
+    def _log(self, message: str, level: str) -> None:
+        if not all(isinstance(arg, str) for arg in (message, level)):
+            raise TypeError("log message and level must be type `str`.")
+        assert hasattr(self._logger, level)
+        formatted = f"{' ' * (20 - len(self._name))}{message}"
+        getattr(self._logger, level)(formatted)
+
+    def info(self, message: str) -> None:
+        self._log(message, "info")
 
     def warn(self, message: str) -> None:
-        indent = " " * (20 - len(self._name))
-        self._logger.warning(f"{indent}{message}")
+        self._log(message, "warning")
 
     def __setattr__(self, name: str, value: typing.Any) -> None:
         super().__setattr__(name, value)

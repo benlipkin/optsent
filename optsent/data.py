@@ -46,7 +46,7 @@ class SentenceCollection(Object):
             inputs.name = "Sentence"
         self._sentences = inputs
         self._graph = Graph(self.size)
-        self.log(f"Built collection of {self.size} sentences.")
+        self.info(f"Built collection of {self.size} sentences.")
 
     @property
     def sentences(self) -> pd.Series:

@@ -15,7 +15,7 @@ from optsent.optimizers import Optimizer
 class ArgTool(Object):
     def _log_arg(self, name: str, value: typing.Any) -> None:
         indent = " " * (12 - len(name))
-        self.log(f"{name}{indent}{value}")
+        self.info(f"{name}{indent}{value}")
 
     def log_args(self, kwargs: typing.Dict[str, typing.Any]) -> None:
         for name, value in kwargs.items():
