@@ -46,3 +46,10 @@ html/coverage/index.html : html/pytest/report.html
 html/pytest/report.html : $(PACKAGE)/*.py test/*.py
 	@$(ACTIVATE) ; coverage run --branch -m pytest \
 	--html=$@ --self-contained-html
+
+
+.PHONY: run
+run :
+	@$(ACTIVATE) ; python -m optsent $(filter-out $@, $(MAKECMDGOALS))
+% : 
+	@true
