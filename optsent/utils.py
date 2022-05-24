@@ -1,8 +1,6 @@
 import cProfile
 import pathlib
 
-# needs testing coverage
-
 
 def profile(func):
     fname = pathlib.Path(__file__).parents[1] / "profile" / f"func={func.__name__}.prof"
