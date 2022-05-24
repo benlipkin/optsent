@@ -1,5 +1,5 @@
-from argparse import ArgumentParser
-from datetime import datetime
+import argparse
+import datetime
 
 from optsent import OptSent
 from optsent.abstract import Object
@@ -8,7 +8,7 @@ from optsent.abstract import Object
 class CLI(Object):
     def __init__(self) -> None:
         super().__init__()
-        self._parser = ArgumentParser()
+        self._parser = argparse.ArgumentParser()
         self._parser.add_argument("inputs")
         self._parser.add_argument("-o", "--outdir", default=self._base / "outputs")
         self._parser.add_argument("-m", "--model", default="gpt2")
@@ -19,9 +19,9 @@ class CLI(Object):
         self._parser.add_argument("-x", "--maximize", action="store_true")
 
     def run_main(self) -> None:
-        start = datetime.now()
+        start = datetime.datetime.now()
         OptSent(**vars(self._parser.parse_args())).run()
-        elapsed = datetime.now() - start
+        elapsed = datetime.datetime.now() - start
         self.info(f"Completed successfully in {elapsed}.")
 
 
