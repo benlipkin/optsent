@@ -37,7 +37,7 @@ html/pylint/index.html : html/pylint/index.json
 html/pylint/index.json : $(PACKAGE)/*.py test/*.py
 	@mkdir -p $(@D)
 	@$(ACTIVATE) ; pylint $(PACKAGE) test/*.py \
-	--disable C0114,C0115,C0116,R0903,R0912,R0913,W0223,W0235,W1203 \
+	--disable C0114,C0115,C0116,R0903,R0912,R0913,W0223,W0235,W0613,W1203 \
 	--generated-members torch.* \
 	--output-format=colorized,json:$@ \
 	|| pylint-exit $$?

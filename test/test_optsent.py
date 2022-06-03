@@ -20,7 +20,7 @@ def test_optsent_constructor():
         pass
 
     def check_output(cls, args):
-        base = "min_test_strings_objective=normlogp_optimizer=greedy_constraint=repeats_model=gpt2"
+        base = "min_test_strings_objective=normlogp_optimizer=greedy_constraint=none_model=gpt2"
         if not all(isinstance(arg, str) for arg in args):
             assert "CUSTOM" in cls.unique_id
         else:

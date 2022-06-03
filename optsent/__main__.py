@@ -14,7 +14,7 @@ class CLI(Object):
         self._parser.add_argument("-m", "--model", default="gpt2")
         self._parser.add_argument("-j", "--objective", default="normlogp")
         self._parser.add_argument("-z", "--optimizer", default="greedy")
-        self._parser.add_argument("-c", "--constraint", default="repeats")
+        self._parser.add_argument("-c", "--constraint", default="none")
         self._parser.add_argument("-l", "--seqlen", default=-1)
         self._parser.add_argument("-x", "--maximize", action="store_true")
 

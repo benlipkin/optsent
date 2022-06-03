@@ -18,7 +18,7 @@ class OptSent(Object):
         model: str | IModel = "gpt2",
         objective: str | IObjective = "normlogp",
         optimizer: str | IOptimizer = "greedy",
-        constraint: str = "repeats",
+        constraint: str = "none",
         seqlen: int = -1,
         maximize: bool = False,
         export: bool = True,

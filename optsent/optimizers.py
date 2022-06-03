@@ -47,11 +47,16 @@ class Optimizer(Object):
 
     @classmethod
     def supported_constraints(cls) -> typing.Set[str]:
-        return {"repeats"}
+        return {"none", "repeats"}
 
     @staticmethod
     def _build_constraint(constraint) -> typing.Callable:
-        if constraint == "repeats":
+        if constraint == "none":
+
+            def satisfied(text: pd.Series, vertex: int, target: int) -> bool:
+                return True
+
+        elif constraint == "repeats":
 
             def satisfied(text: pd.Series, vertex: int, target: int) -> bool:
                 return (
@@ -59,8 +64,9 @@ class Optimizer(Object):
                     != re.sub(r"[^A-Za-z0-9 ]+", "", text[target]).lower().split()[0]
                 )
 
-            return satisfied
-        raise ValueError("Unsupported constraint.")
+        else:
+            raise ValueError("Unsupported constraint.")
+        return satisfied
 
     def solve(self, sents: SentenceCollection) -> None:
         if not isinstance(sents, SentenceCollection):
