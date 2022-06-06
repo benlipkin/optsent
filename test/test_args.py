@@ -1,3 +1,4 @@
+import multiprocessing
 import pathlib
 
 import numpy as np
@@ -127,6 +128,20 @@ def test_seqlen_prep():
     for arg in ("10", 4.4):
         check_raises(func, arg, TypeError)
     for arg in (-2, 0, 1):
+        check_raises(func, arg, ValueError)
+
+
+def test_ncores_prep():
+    def check_output(ncores, max_cores):
+        assert np.abs(ncores) <= max_cores and ncores not in [0, -max_cores]
+
+    func = ArgTool().prep_ncores
+    max_cores = multiprocessing.cpu_count()
+    for arg in (1, -1, max_cores, -max_cores + 1):
+        check_output(func(arg), max_cores)
+    for arg in ("1", 4.3):
+        check_raises(func, arg, TypeError)
+    for arg in (0, max_cores + 1, -max_cores):
         check_raises(func, arg, ValueError)
 
 

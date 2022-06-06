@@ -1,4 +1,5 @@
 import hashlib
+import multiprocessing
 import pathlib
 import typing
 
@@ -22,7 +23,9 @@ class ArgTool(Object):
             self._log_arg(name, value)
 
     def get_unique_id(self, kwargs: typing.Dict[str, typing.Any]) -> str:
-        md5 = lambda x: hashlib.md5(str(x).encode()).hexdigest()
+        def md5(obj):
+            return hashlib.md5(str(obj).encode()).hexdigest()
+
         elements = ["max" if kwargs["maximize"] else "min"]
         inputs = kwargs["inputs"]
         if isinstance(inputs, (str, pathlib.Path)):
@@ -157,6 +160,17 @@ class ArgTool(Object):
         if not isinstance(maximize, bool):
             raise TypeError("maximize only accepts type `bool`.")
         return maximize
+
+    @staticmethod
+    def prep_ncores(ncores: int) -> int:
+        if not isinstance(ncores, int):
+            raise TypeError("ncores only accepts type `int`.")
+        max_cores = multiprocessing.cpu_count()
+        if not ((np.abs(ncores) <= max_cores) and (ncores not in [0, -max_cores])):
+            raise ValueError(
+                f"ncores must be != 0 and <= number of cores: {max_cores}."
+            )
+        return ncores
 
     @staticmethod
     def prep_export(export: bool) -> bool:

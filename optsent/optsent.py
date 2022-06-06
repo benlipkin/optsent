@@ -21,6 +21,7 @@ class OptSent(Object):
         constraint: str = "none",
         seqlen: int = -1,
         maximize: bool = False,
+        ncores: int = 1,
         export: bool = True,
     ) -> None:
         # pylint: disable=unused-argument
@@ -43,7 +44,7 @@ class OptSent(Object):
         self.info("Building transition graph.")
         dim = self._inputs.size
         indices = tqdm.tqdm(
-            itertools.product(range(dim), range(dim)), total=dim ** 2
+            itertools.product(range(dim), range(dim)), total=dim**2
         )  # type:ignore
         for i, j in indices:
             if i == j:

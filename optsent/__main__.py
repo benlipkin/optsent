@@ -17,6 +17,7 @@ class CLI(Object):
         self._parser.add_argument("-c", "--constraint", default="none")
         self._parser.add_argument("-l", "--seqlen", default=-1)
         self._parser.add_argument("-x", "--maximize", action="store_true")
+        self._parser.add_argument("-n", "--ncores", default=-1)
 
     def run_main(self) -> None:
         start = datetime.datetime.now()
