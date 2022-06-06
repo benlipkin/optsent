@@ -35,22 +35,22 @@ python -m pip install optsent
 **CLI:**
 
 ```bash
-usage: __main__.py [-h] [-o OUTDIR] [-m MODEL] [-j OBJECTIVE] [-s SOLVER] [-c CONSTRAINT] [-l SEQLEN] [-x] inputs
+usage: __main__.py [-h] [-x] [-o OUTDIR] [-m MODEL] [-j OBJECTIVE] [-s SOLVER] [-c CONSTRAINT] [-f CUTOFF] [-l SEQLEN] [-n NCORES] inputs
 
 positional arguments (required):
 inputs 						(path to CSV)
 
 additional arguments (optional):
 -h, --help  show this help message and exit
+-x, --maximize					(default: false [minimize])
 -o OUTDIR, --outdir OUTDIR 			(default: ./outputs/)
 -m MODEL, --model MODEL				(default: gpt2 [can be any HuggingFace CausalLM])
 -j OBJECTIVE, --objective OBJECTIVE		(default: logp(s1s2)-logp(s1)-logp(s2))
 -s SOLVER, --solver SOLVER			(default: GreedyATSP)
 -c CONSTRAINT, --constraint CONSTRAINT		(default: no word repeats on boundaries)
--f CUTOFF, --cutoff CUTOFF          (default: 0.0 [only used by constrained sampling optimizer])
+-f CUTOFF, --cutoff CUTOFF                      (default: 0 [only used by constrained sampling optimizer])
 -l SEQLEN, --seqlen SEQLEN			(default: same length as input materials)
--x, --maximize					(default: false [minimize])
--n NCORES, --ncores NCORES      (default: all available threads)
+-n NCORES, --ncores NCORES                      (default: all available threads)
 
 examples:
 python -m optsent inputs/strings.csv
