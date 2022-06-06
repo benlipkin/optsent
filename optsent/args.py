@@ -61,7 +61,7 @@ class ArgTool(Object):
         if isinstance(objective, str):
             supported = Objective.supported_functions().keys()
             if objective not in supported:
-                raise ValueError("objective must be one of {supported}.")
+                raise ValueError(f"objective must be one of {supported}.")
             return Objective(objective)
         if isinstance(objective, type):
             raise TypeError("objective must be an instance of a class, not a type.")
@@ -135,7 +135,7 @@ class ArgTool(Object):
             return optimizer
         supported = Optimizer.supported_optimizers().keys()
         if optimizer not in supported:
-            raise ValueError("optimizer must be one of {supported}.")
+            raise ValueError(f"optimizer must be one of {supported}.")
         return optimizer
 
     @staticmethod
@@ -144,7 +144,7 @@ class ArgTool(Object):
             raise TypeError("constraint only accepts type `str`.")
         supported = Optimizer.supported_constraints()
         if constraint not in supported:
-            raise ValueError("constraint must be one of {supported}.")
+            raise ValueError(f"constraint must be one of {supported}.")
         return constraint
 
     @staticmethod
