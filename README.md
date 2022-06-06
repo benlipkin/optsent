@@ -47,8 +47,10 @@ additional arguments (optional):
 -j OBJECTIVE, --objective OBJECTIVE		(default: logp(s1s2)-logp(s1)-logp(s2))
 -s SOLVER, --solver SOLVER			(default: GreedyATSP)
 -c CONSTRAINT, --constraint CONSTRAINT		(default: no word repeats on boundaries)
+-f CUTOFF, --cutoff CUTOFF          (default: 0.0 [only used by constrained sampling optimizer])
 -l SEQLEN, --seqlen SEQLEN			(default: same length as input materials)
 -x, --maximize					(default: false [minimize])
+-n NCORES, --ncores NCORES      (default: all available threads)
 
 examples:
 python -m optsent inputs/strings.csv
@@ -80,23 +82,25 @@ INFO:ArgTool:             outdir      ~/optsent/outputs
 INFO:ArgTool:             model       gpt2
 INFO:ArgTool:             objective   normlogp
 INFO:ArgTool:             optimizer   greedy
-INFO:ArgTool:             constraint  repeats
+INFO:ArgTool:             constraint  none
+INFO:ArgTool:             cutoff      0.0
 INFO:ArgTool:             seqlen      -1
 INFO:ArgTool:             maximize    False
+INFO:ArgTool:             ncores      -1
 INFO:ArgTool:             export      True
-INFO:ArgTool:             unique_id   min_SampleSmall_objective=normlogp_optimizer=greedy_constraint=repeats_model=gpt2
+INFO:ArgTool:             unique_id   min_SampleSmall_objective=normlogp_optimizer=greedy_constraint=none_cutoff=0.0_model=gpt2
 INFO:SentenceCollection:  Built collection of 10 sentences.
 INFO:Model:               Loaded pretrained gpt2 model on cpu.
 INFO:Objective:           Defined NormJointLogProb objective.
-INFO:Optimizer:           Defined GreedyATSP optimizer.
+INFO:Optimizer:           Defined Greedy optimizer.
 INFO:OptSent:             Caching input strings.
 INFO:OptSent:             Building transition graph.
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:04<00:00, 20.99it/s]
+100%|██████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 27.68it/s]
 INFO:OptSent:             Caching transition graph.
 INFO:OptSent:             Solving sequence optimization.
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 20404.72it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 60397.98it/s]
 INFO:OptSent:             Exporting optimal sequence.
-INFO:CLI:                 Completed successfully in 0:00:08.423529.
+INFO:CLI:                 Completed successfully in 0:00:08.321483.
 ```
 
 ### Where can I learn more?
