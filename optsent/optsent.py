@@ -2,6 +2,7 @@ import itertools
 import pathlib
 import typing
 
+import joblib
 import numpy as np
 import pandas as pd
 import tqdm
@@ -46,13 +47,19 @@ class OptSent(Object):
         indices = tqdm.tqdm(
             itertools.product(range(dim), range(dim)), total=dim**2
         )  # type:ignore
-        for i, j in indices:
+
+        def write_weight(self, i, j):
             if i == j:
                 value = np.nan
             else:
                 sent1, sent2 = self._inputs.sentences[i], self._inputs.sentences[j]
                 value = self._objective.evaluate(sent1, sent2, self._model)
             self._inputs.graph.write_transition_weight(i, j, value)
+
+        with joblib.parallel_backend("threading", n_jobs=self._ncores):
+            joblib.Parallel()(
+                joblib.delayed(write_weight)(self, i, j) for i, j in indices
+            )
 
     def _solve_optim(self) -> None:
         self.info("Solving sequence optimization.")

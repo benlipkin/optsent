@@ -31,6 +31,7 @@ pytest : env html/coverage/index.html
 html/mypy/index.html : $(PACKAGE)/*.py
 	@$(ACTIVATE) ; mypy \
 	-p $(PACKAGE) \
+	--ignore-missing-imports \
 	--html-report $(@D)
 html/pylint/index.html : html/pylint/index.json
 	@$(ACTIVATE) ; pylint-json2html -o $@ -e utf-8 $<
