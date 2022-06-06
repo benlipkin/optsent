@@ -33,10 +33,10 @@ class ArgTool(Object):
         else:
             elem = f"CUSTOM{md5(inputs)}"
         elements.append(elem)
-        for key in ["objective", "optimizer", "constraint", "model"]:
+        for key in ["objective", "optimizer", "constraint", "cutoff", "model"]:
             value = kwargs[key]
-            if isinstance(value, str):
-                elem = value
+            if isinstance(value, (str, int, float)):
+                elem = str(value)
             else:
                 elem = f"CUSTOM{md5(value)}"
             elements.append(f"{key}={elem}")
@@ -78,6 +78,7 @@ class ArgTool(Object):
             return Optimizer(
                 optimizer=optim,
                 constraint=kwargs["constraint"],
+                cutoff=kwargs["cutoff"],
                 seqlen=kwargs["seqlen"],
                 maximize=kwargs["maximize"],
             )
@@ -146,6 +147,12 @@ class ArgTool(Object):
         if constraint not in supported:
             raise ValueError(f"constraint must be one of {supported}.")
         return constraint
+
+    @staticmethod
+    def prep_cutoff(cutoff: int | float) -> float:
+        if not isinstance(cutoff, (int, float)):
+            raise TypeError("cutoff only accepts types `int` & `float`.")
+        return float(cutoff)
 
     @staticmethod
     def prep_seqlen(seqlen: int) -> int:

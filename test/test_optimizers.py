@@ -25,10 +25,19 @@ def test_optimizer_constructor():
         assert hasattr(optim, "solve")
 
     cls = Optimizer
-    check_output(cls("greedy", "repeats", 100, True))
-    for arg in ((1, "", 1, True), ("", 1, 1, True), ("", "", "", True), ("", "", 1, 1)):
+    check_output(cls("greedy", "repeats", 0.0, 100, True))
+    for arg in (
+        (1, "", 0.0, 1, True),
+        ("", 1, 0.0, 1, True),
+        ("", "", "", 1, True),
+        ("", "", 0.0, "", True),
+        ("", "", 0.0, 1, 1),
+    ):
         check_raises(cls, arg, TypeError)
-    for arg in (("fake", "repeats", 100, True), ("greedy", "fake", 100, True)):
+    for arg in (
+        ("fake", "repeats", 0.0, 100, True),
+        ("greedy", "fake", 0.0, 100, True),
+    ):
         check_raises(cls, arg, ValueError)
 
 
@@ -37,7 +46,7 @@ def test_optimizer_greedy_base():
         assert cls.indices == [0, 1, 2]
         assert cls.values == [np.nan, 1, 5]
 
-    cls = Optimizer("greedy", "repeats", -1, False)
+    cls = Optimizer("greedy", "repeats", 0.0, -1, False)
     func = cls.solve
     coll = get_default_coll()
     fill_graph(coll)
@@ -55,7 +64,7 @@ def test_optimizer_greedy_seqlen():
             assert len(cls.indices) == seqlen
 
     for arg in (-1, 0, 1, 2, 3, 10):
-        cls = Optimizer("greedy", "repeats", arg, False)
+        cls = Optimizer("greedy", "repeats", 0.0, arg, False)
         coll = get_default_coll()
         fill_graph(coll)
         cls.solve(coll)
@@ -64,10 +73,10 @@ def test_optimizer_greedy_seqlen():
 
 def test_optimizer_greedy_constraint():
     def check_side_effect(cls):
-        assert len(cls.indices) == 2
-        assert cls.indices == [0, 2]
+        assert len(cls.indices) == 3
+        assert cls.indices == [0, 2, 1]
 
-    cls = Optimizer("greedy", "repeats", -1, False)
+    cls = Optimizer("greedy", "repeats", 0.0, -1, False)
     test = ["a", "a", "b"]
     coll = ArgTool().prep_inputs(test)
     fill_graph(coll)
@@ -80,8 +89,37 @@ def test_optimizer_greedy_maximize():
         assert cls.indices == [2, 1, 0]
         assert cls.values == [np.nan, 7, 3]
 
-    cls = Optimizer("greedy", "repeats", -1, True)
+    cls = Optimizer("greedy", "repeats", 0.0, -1, True)
     coll = get_default_coll()
     fill_graph(coll)
     cls.solve(coll)
+    check_side_effect(cls)
+
+
+def test_optimizer_sampling_base():
+    def check_side_effect(cls):
+        assert cls.indices == [0, 1, 2]
+        assert cls.values == [np.nan, -9, -5]
+
+    np.random.seed(0)
+    cls = Optimizer("sampling", "repeats", 0.0, -1, False)
+    func = cls.solve
+    coll = get_default_coll()
+    fill_graph(coll)
+    coll.graph.matrix[:, :] -= 10
+    func(coll)
+    check_side_effect(cls)
+
+
+def test_optimizer_sampling_cutoff():
+    def check_side_effect(cls):
+        assert cls.indices == [0, 1, 2]
+        assert cls.values == [np.nan, 1, 5]
+
+    np.random.seed(0)
+    cls = Optimizer("sampling", "repeats", -10.0, -1, False)
+    func = cls.solve
+    coll = get_default_coll()
+    fill_graph(coll)
+    func(coll)
     check_side_effect(cls)

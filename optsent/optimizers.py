@@ -1,7 +1,9 @@
+import abc
 import re
 import typing
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import tqdm
 
@@ -10,12 +12,20 @@ from optsent.data import SentenceCollection
 
 
 class Optimizer(Object):
-    def __init__(self, optimizer: str, constraint: str, seqlen: int, maximize: bool):
+    def __init__(
+        self,
+        optimizer: str,
+        constraint: str,
+        cutoff: float,
+        seqlen: int,
+        maximize: bool,
+    ):
         super().__init__()
         if not all(
             isinstance(arg, type)
             for arg, type in zip(
-                (optimizer, constraint, seqlen, maximize), (str, str, int, bool)
+                (optimizer, constraint, cutoff, seqlen, maximize),
+                (str, str, float, int, bool),
             )
         ):
             raise TypeError("arguments must adhere to interface.")
@@ -25,7 +35,7 @@ class Optimizer(Object):
         satisfied: typing.Callable = self._build_constraint(constraint)
         try:
             self._optimizer = self.supported_optimizers()[self._id](
-                maximize, seqlen, satisfied
+                maximize, seqlen, satisfied, cutoff
             )
         except KeyError as invalid_optimizer:
             raise ValueError(
@@ -43,7 +53,7 @@ class Optimizer(Object):
 
     @classmethod
     def supported_optimizers(cls) -> typing.Dict[str, typing.Callable]:
-        return {"greedy": _GreedyATSP}
+        return {"greedy": _Greedy, "sampling": _Sampling}
 
     @classmethod
     def supported_constraints(cls) -> typing.Set[str]:
@@ -74,22 +84,43 @@ class Optimizer(Object):
         self._indices, self._values = self._optimizer(sents)
 
 
-class _GreedyATSP(Object):
-    def __init__(self, maximize: bool, seqlen: int, satisfied: typing.Callable):
+class _LinearATSP(Object):
+    def __init__(
+        self, maximize: bool, seqlen: int, satisfied: typing.Callable, cutoff: float
+    ):
         super().__init__()
         self._opt = np.max if maximize else np.min
         self._argopt = np.argmax if maximize else np.argmin
-        self._null = -np.inf if maximize else np.inf
+        self._sign = -1 if maximize else 1
+        self._null = self._sign * np.inf
         self._seqlen = seqlen
         self._satisfied = satisfied
+        self._cutoff = cutoff
 
-    def _update_seqlen(self, sents):
+    def _update_seqlen(self, sents: SentenceCollection) -> None:
         if self._seqlen > sents.size:
             self._seqlen = sents.size
         elif self._seqlen <= 0:
             self._seqlen = sents.size
         else:
             pass
+
+    @abc.abstractmethod
+    def _select_optimal_target(
+        self, matrix: npt.NDArray[np.float64], vertex: np.int64
+    ) -> np.int64:
+        raise NotImplementedError()  # pragma: no cover
+
+    def _select_random_target(
+        self, matrix: npt.NDArray[np.float64], vertex: np.int64
+    ) -> np.int64:
+        self.warn(
+            "Stuck at non-optimal transition. Sampling new states until constraints valid."
+        )
+        targets = matrix[vertex, :]
+        mask = targets != self._null
+        options = np.where(mask)[0]
+        return np.random.choice(options)
 
     def __call__(
         self, sents: SentenceCollection
@@ -105,16 +136,35 @@ class _GreedyATSP(Object):
         indices.append(vertex)
         values.append(np.nan)
         for _ in tqdm.trange(self._seqlen - 1):  # type:ignore
-            target = self._argopt(matrix[vertex, :])
+            target = self._select_optimal_target(matrix, vertex)
             while not self._satisfied(sents.sentences, vertex, target):
-                matrix[:, target] = self._null
-                target = self._argopt(matrix[vertex, :])
+                target = self._select_random_target(matrix, vertex)
             value = matrix[vertex, target]
-            if value != self._null:
-                indices.append(target)
-                values.append(value)
-                matrix[:, target] = self._null
-                vertex = target
-            else:
-                self.warn("Sample skipped due to constraint. Set will have n<seqlen.")
+            if value == self._null:  # pragma: no cover
+                self.warn(
+                    "Non-optimal sample selected. Check transitions in final set."
+                )
+            indices.append(target)
+            values.append(value)
+            matrix[:, target] = self._null
+            vertex = target
         return indices, values
+
+
+class _Greedy(_LinearATSP):
+    def _select_optimal_target(
+        self, matrix: npt.NDArray[np.float64], vertex: np.int64
+    ) -> np.int64:
+        return self._argopt(matrix[vertex, :])
+
+
+class _Sampling(_LinearATSP):
+    def _select_optimal_target(
+        self, matrix: npt.NDArray[np.float64], vertex: np.int64
+    ) -> np.int64:
+        targets = matrix[vertex, :]
+        mask = self._sign * targets < self._cutoff
+        if not mask.sum() > 0:
+            return self._select_random_target(matrix, vertex)
+        options = np.where(mask)[0]
+        return np.random.choice(options)

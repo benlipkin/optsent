@@ -20,6 +20,7 @@ class OptSent(Object):
         objective: str | IObjective = "normlogp",
         optimizer: str | IOptimizer = "greedy",
         constraint: str = "none",
+        cutoff: float = 0.0,
         seqlen: int = -1,
         maximize: bool = False,
         ncores: int = 1,

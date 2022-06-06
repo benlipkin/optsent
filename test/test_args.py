@@ -85,6 +85,7 @@ def test_optimizer_build():
         {
             "optimizer": "greedy",
             "constraint": "repeats",
+            "cutoff": 0.0,
             "seqlen": -1,
             "maximize": False,
         },
@@ -116,6 +117,17 @@ def test_constraint_prep():
     check_output(func("repeats"))
     check_raises(func, 123, TypeError)
     check_raises(func, "fake", ValueError)
+
+
+def test_cutoff_prep():
+    def check_output(cutoff):
+        assert isinstance(cutoff, float)
+
+    func = ArgTool().prep_cutoff
+    for arg in (-1e9, 0.0, 0, 1e9):
+        check_output(func(arg))
+    for arg in ("1", []):
+        check_raises(func, arg, TypeError)
 
 
 def test_seqlen_prep():

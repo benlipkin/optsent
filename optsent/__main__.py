@@ -15,6 +15,7 @@ class CLI(Object):
         self._parser.add_argument("-j", "--objective", default="normlogp")
         self._parser.add_argument("-z", "--optimizer", default="greedy")
         self._parser.add_argument("-c", "--constraint", default="none")
+        self._parser.add_argument("-f", "--cutoff", type=float, default=0.0)
         self._parser.add_argument("-l", "--seqlen", type=int, default=-1)
         self._parser.add_argument("-x", "--maximize", action="store_true")
         self._parser.add_argument("-n", "--ncores", type=int, default=-1)
