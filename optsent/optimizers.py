@@ -69,10 +69,10 @@ class Optimizer(Object):
         elif constraint == "repeats":
 
             def satisfied(text: pd.Series, vertex: int, target: int) -> bool:
-                return (
-                    re.sub(r"[^A-Za-z0-9 ]+", "", text[vertex]).lower().split()[-1]
-                    != re.sub(r"[^A-Za-z0-9 ]+", "", text[target]).lower().split()[0]
-                )
+                def tokenize(string: str) -> typing.List[str]:
+                    return re.sub(r"[^A-Za-z0-9 ]+", "", string).lower().split()
+
+                return tokenize(text[vertex])[-1] != tokenize(text[target])[0]
 
         else:
             raise ValueError("Unsupported constraint.")
@@ -122,6 +122,24 @@ class _LinearATSP(Object):
         options = np.where(mask)[0]
         return np.random.choice(options)
 
+    def _get_next_vertex(
+        self,
+        matrix: npt.NDArray[np.float64],
+        vertex: np.int64,
+        sents: SentenceCollection,
+    ) -> np.int64:
+        target = self._select_optimal_target(matrix, vertex)
+        attempts = 5
+        while not self._satisfied(sents.sentences, vertex, target):
+            if not attempts:
+                self.warn(
+                    f"No valid transitions found. Relaxing constraints from state {vertex}."
+                )
+                break
+            target = self._select_random_target(matrix, vertex)
+            attempts -= 1
+        return target
+
     def __call__(
         self, sents: SentenceCollection
     ) -> typing.Tuple[typing.List[np.int64], typing.List[float]]:
@@ -136,14 +154,8 @@ class _LinearATSP(Object):
         indices.append(vertex)
         values.append(np.nan)
         for _ in tqdm.trange(self._seqlen - 1):  # type:ignore
-            target = self._select_optimal_target(matrix, vertex)
-            while not self._satisfied(sents.sentences, vertex, target):
-                target = self._select_random_target(matrix, vertex)
+            target = self._get_next_vertex(matrix, vertex, sents)
             value = matrix[vertex, target]
-            if value == self._null:  # pragma: no cover
-                self.warn(
-                    "Non-optimal sample selected. Check transitions in final set."
-                )
             indices.append(target)
             values.append(value)
             matrix[:, target] = self._null

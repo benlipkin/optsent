@@ -71,13 +71,28 @@ def test_optimizer_greedy_seqlen():
         check_side_effect(cls, arg, coll)
 
 
-def test_optimizer_greedy_constraint():
+def test_optimizer_greedy_constraint_base():
     def check_side_effect(cls):
         assert len(cls.indices) == 3
         assert cls.indices == [0, 2, 1]
 
+    np.random.seed(0)
     cls = Optimizer("greedy", "repeats", 0.0, -1, False)
     test = ["a", "a", "b"]
+    coll = ArgTool().prep_inputs(test)
+    fill_graph(coll)
+    cls.solve(coll)
+    check_side_effect(cls)
+
+
+def test_optimizer_greedy_constraint_resolution():
+    def check_side_effect(cls):
+        assert len(cls.indices) == 5
+        assert set(cls.indices) == set(range(5))
+
+    np.random.seed(0)
+    cls = Optimizer("greedy", "repeats", 0.0, -1, False)
+    test = ["a", "a", "a", "a", "a"]
     coll = ArgTool().prep_inputs(test)
     fill_graph(coll)
     cls.solve(coll)
