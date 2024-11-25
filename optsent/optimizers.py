@@ -25,7 +25,7 @@ class Optimizer(Object):
             isinstance(arg, type)
             for arg, type in zip(
                 (optimizer, constraint, cutoff, seqlen, maximize),
-                (str, str, float, int, bool),
+                (str, str, (int,float), int, bool),
             )
         ):
             raise TypeError("arguments must adhere to interface.")
